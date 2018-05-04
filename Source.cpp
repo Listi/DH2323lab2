@@ -112,7 +112,7 @@ bool ClosestIntersection(
 	for (size_t i = 0; i < triangles.size(); ++i) {
 
 		Triangle triangle = triangles[i];
-		// Calculate the value of x, (t, u, v)
+		// (t, u, v) intersection, ta ut x
 		
 		vec3 v0 = triangle.v0;
 		vec3 v1 = triangle.v1;
@@ -124,10 +124,10 @@ bool ClosestIntersection(
 		vec3 x = glm::inverse(A) * b;
 
 		
-		//Kör in i triangel
-		float t = x.x;
-		float u = x.y;
-		float v = x.z;
+		//Kolla om på triangel
+		float t = x.x; //pos 
+		float u = x.y; //scalär koordinat
+		float v = x.z;// scalär koordinat
 
 		// Om det blir en intersection
 		if (0 <= u && 0 <= v && u + v <= 1 && t >= 0) {
