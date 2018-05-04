@@ -7,6 +7,9 @@
 using namespace std;
 using glm::vec3;
 using glm::mat3;
+using glm::cos;
+using glm::sin;
+
 
 
 struct Intersection
@@ -19,14 +22,18 @@ struct Intersection
 // ----------------------------------------------------------------------------
 // GLOBAL VARIABLES
 
-const int SCREEN_WIDTH = 400;
-const int SCREEN_HEIGHT = 400;
+const int SCREEN_WIDTH = 100;
+const int SCREEN_HEIGHT = 100;
+float yaw = 0;//rotationsvinkel i yled
+mat3 R; //Rotmatris
 SDL_Surface* screen;
 int t;
 
 vector<Triangle> triangles;
-float focalLength = 400;   //Sätt samma som height/width annars blire knas
+float focalLength = 100;   //Sätt samma som height/width annars blire knas
 vec3 cameraPos(0, 0, - 3);  //(? sök på pinhole camera figure)
+
+
 
 // ----------------------------------------------------------------------------
 // FUNCTIONS
@@ -65,10 +72,37 @@ void Update()
 {
 	// Compute frame time:
 	int t2 = SDL_GetTicks();
-	float dt = float(t2 - t);
+	float dt = float(t2 - t); //timehoran finns ju inte!
 	t = t2;
 	cout << "Render time: " << dt << " ms." << endl;
+
+	//4
+	float con = 0.2;
+	Uint8* keystate = SDL_GetKeyState(0);
+	if (keystate[SDLK_UP]) //In
+	{
+		cameraPos.z += con;
+	}
+	if (keystate[SDLK_DOWN]) //ut
+	{
+		cameraPos.z -= con;
+	}
+	if (keystate[SDLK_LEFT]) //snurr i z led
+	{
+		yaw += con;
+		
+	}
+	if (keystate[SDLK_RIGHT]) //snurr i z led
+	{
+		yaw -= con;
+		
+	}	//Uppdatera rotationsmatrisen
+	//R = mat3(cos(yaw), 0, sin(yaw), 0, 1, 0, -sin(yaw), 0, cos(yaw));
+	R[0][0] = cos(yaw);  R[0][1] = 0; R[0][2] = sin(yaw);
+	R[1][0] = 0; R[1][1] = 1;  R[1][2] = 0;
+	R[2][0] = -sin(yaw);  R[2][1] = 0;  R[2][2] = cos(yaw);
 }
+
 
 void Draw()
 {
@@ -114,9 +148,9 @@ bool ClosestIntersection(
 		Triangle triangle = triangles[i];
 		// (t, u, v) intersection, ta ut x
 		
-		vec3 v0 = triangle.v0;
-		vec3 v1 = triangle.v1;
-		vec3 v2 = triangle.v2;
+		vec3 v0 = triangle.v0*R;
+		vec3 v1 = triangle.v1*R;
+		vec3 v2 = triangle.v2*R;
 		vec3 e1 = v1 - v0;
 		vec3 e2 = v2 - v0;
 		vec3 b = start - v0;
